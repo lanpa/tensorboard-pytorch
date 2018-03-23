@@ -48,11 +48,13 @@ def parse(graph):
 
 def graph(model, args, verbose=False):
     import torch
-    with torch.onnx.set_training(model, False):
-        trace, _ = torch.jit.trace(model, args)
     if LooseVersion(torch.__version__) >= LooseVersion("0.4"):
+        with torch.onnx.set_training(model, False):
+            trace, _ = torch.jit.get_trace_graph(model, args)
         torch.onnx._optimize_trace(trace, False)
     else:
+        with torch.onnx.set_training(model, False):
+            trace, _ = torch.jit.trace(model, args)
         torch.onnx._optimize_trace(trace)
     graph = trace.graph()
     if verbose:
