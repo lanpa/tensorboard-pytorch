@@ -83,7 +83,7 @@ class SimpleModel(nn.Module):
     def __init__(self):
         super(SimpleModel, self).__init__()
     def forward(self, x):
-        return x*2
+        return x*torch.FloatTensor([2])
         
 
 model = SimpleModel()
