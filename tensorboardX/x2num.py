@@ -10,7 +10,8 @@ import six
 def make_np(x, modality=None):
     if isinstance(x, np.ndarray):
         return prepare_numpy(x, modality)
-    if isinstance(x, six.string_types):  # Caffe2 will pass name of blob(s) to fetch
+    if isinstance(
+            x, six.string_types):  # Caffe2 will pass name of blob(s) to fetch
         return prepare_caffe2(x, modality)
     if np.isscalar(x):
         return np.array([x])
@@ -78,7 +79,8 @@ def prepare_chainer(x, modality):
 
 
 def make_grid(I, ncols=8):
-    assert isinstance(I, np.ndarray), 'plugin error, should pass numpy array here'
+    assert isinstance(
+        I, np.ndarray), 'plugin error, should pass numpy array here'
     assert I.ndim == 4 and I.shape[1] == 3
     nimg = I.shape[0]
     H = I.shape[2]
@@ -98,7 +100,8 @@ def make_grid(I, ncols=8):
 
 def _prepare_image(I):
     # convert [N]CHW image to HWC
-    assert isinstance(I, np.ndarray), 'plugin error, should pass numpy array here'
+    assert isinstance(
+        I, np.ndarray), 'plugin error, should pass numpy array here'
     assert I.ndim == 2 or I.ndim == 3 or I.ndim == 4
     if I.ndim == 4:  # NCHW
         if I.shape[1] == 1:  # N1HW
@@ -127,7 +130,16 @@ def _prepare_video(V):
     # pad to nearest power of 2, all at once
     if not is_power2(V.shape[0]):
         len_addition = int(2**V.shape[0].bit_length() - V.shape[0])
-        V = np.concatenate((V, np.zeros(shape=(len_addition, c, t, h, w))), axis=0)
+        V = np.concatenate(
+            (V,
+             np.zeros(
+                 shape=(
+                     len_addition,
+                     c,
+                     t,
+                     h,
+                     w))),
+            axis=0)
 
     b = V.shape[0]
     n_rows = 2**((b.bit_length() - 1) // 2)

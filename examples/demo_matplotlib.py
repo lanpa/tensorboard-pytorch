@@ -3,8 +3,8 @@ plt.switch_backend('agg')
 
 fig = plt.figure()
 
-c1 = plt.Circle((0.2,0.5), 0.2, color='r')
-c2 = plt.Circle((0.8,0.5), 0.2, color='r')
+c1 = plt.Circle((0.2, 0.5), 0.2, color='r')
+c2 = plt.Circle((0.8, 0.5), 0.2, color='r')
 
 ax = plt.gca()
 ax.add_patch(c1)

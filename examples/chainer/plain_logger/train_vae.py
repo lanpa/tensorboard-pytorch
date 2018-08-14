@@ -65,7 +65,7 @@ if args.test:
 else:
     N = 60000
 
-x_train, x_test = np.split(mnist['data'],   [N])
+x_train, x_test = np.split(mnist['data'], [N])
 y_train, y_test = np.split(mnist['target'], [N])
 N_test = y_test.size
 
@@ -105,8 +105,8 @@ for epoch in six.moves.range(1, n_epoch + 1):
                     (model.loss, ))
                 o.write(g.dump())
             print('graph generated')
-        writer.add_scalar('train/loss', model.loss, epoch*N+i)
-        writer.add_scalar('train/rec_loss', model.rec_loss, epoch*N+i)
+        writer.add_scalar('train/loss', model.loss, epoch * N + i)
+        writer.add_scalar('train/rec_loss', model.rec_loss, epoch * N + i)
         sum_loss += float(model.loss.data) * len(x.data)
         sum_rec_loss += float(model.rec_loss.data) * len(x.data)
 
@@ -123,10 +123,15 @@ for epoch in six.moves.range(1, n_epoch + 1):
             loss_func(x)
             sum_loss += float(model.loss.data) * len(x.data)
             sum_rec_loss += float(model.rec_loss.data) * len(x.data)
-            writer.add_scalar('test/loss', model.loss, epoch*N_test+i)
-            writer.add_scalar('test/rec_loss', model.rec_loss, epoch*N_test+i)
-            writer.add_image('reconstructed', model(x).reshape(-1,1,28,28), epoch*N_test+i)
-            writer.add_image('input', x.reshape(-1,1,28,28), epoch*N_test+i)
+            writer.add_scalar('test/loss', model.loss, epoch * N_test + i)
+            writer.add_scalar(
+                'test/rec_loss',
+                model.rec_loss,
+                epoch * N_test + i)
+            writer.add_image('reconstructed', model(
+                x).reshape(-1, 1, 28, 28), epoch * N_test + i)
+            writer.add_image('input', x.reshape(-1, 1, 28, 28),
+                             epoch * N_test + i)
             del model.loss
     print('test  mean loss={}, mean reconstruction loss={}'
           .format(sum_loss / N_test, sum_rec_loss / N_test))

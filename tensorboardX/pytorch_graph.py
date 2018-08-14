@@ -3,12 +3,12 @@ import warnings
 
 from distutils.version import LooseVersion
 
-from .src.attr_value_pb2 import AttrValue
-from .src.graph_pb2 import GraphDef
-from .src.node_def_pb2 import NodeDef
-from .src.step_stats_pb2 import RunMetadata, StepStats, DeviceStepStats, NodeExecStats, AllocatorMemoryUsed
-from .src.tensor_shape_pb2 import TensorShapeProto
-from .src.versions_pb2 import VersionDef
+from .proto.attr_value_pb2 import AttrValue
+from .proto.graph_pb2 import GraphDef
+from .proto.node_def_pb2 import NodeDef
+from .proto.step_stats_pb2 import RunMetadata, StepStats, DeviceStepStats, NodeExecStats, AllocatorMemoryUsed
+from .proto.tensor_shape_pb2 import TensorShapeProto
+from .proto.versions_pb2 import VersionDef
 
 
 def parse(graph):
@@ -33,17 +33,22 @@ def parse(graph):
     for count, n in enumerate(graph.outputs()):
         uname = 'output' + str(count)
         scope[uname] = 'output'
-        nodes.append({'name': uname, 'op': 'output', 'inputs': [n.uniqueName()], 'attr': 'output'})
+        nodes.append({'name': uname, 'op': 'output', 'inputs': [
+                     n.uniqueName()], 'attr': 'output'})
 
     for n in graph.nodes():
         try:
             attrs = str({k: n[k] for k in n.attributeNames()})
         except RuntimeError as e:
             attrs = str(n).strip()
-            warnings.warn("Error getting attributes of node {}, error is {}".format(attrs, e))
-        attrs = attrs.replace("'", ' ')  # singlequote will be escaped by tensorboard
+            warnings.warn(
+                "Error getting attributes of node {}, error is {}".format(
+                    attrs, e))
+        # singlequote will be escaped by tensorboard
+        attrs = attrs.replace("'", ' ')
         inputs = [i.uniqueName() for i in n.inputs()]
-        outputnode = next(iter(n.outputs()))  # FIXME: only first output is considered (only Dropout)
+        # FIXME: only first output is considered (only Dropout)
+        outputnode = next(iter(n.outputs()))
         uname = outputnode.uniqueName()
         if outputnode.type().kind() == 'TensorType':
             outputsize = outputnode.type().sizes()
@@ -53,7 +58,8 @@ def parse(graph):
                           'attr': attrs,
                           'outputsize': outputsize})
         else:
-            nodes.append({'name': uname, 'op': n.kind(), 'inputs': inputs, 'attr': attrs})
+            nodes.append({'name': uname, 'op': n.kind(),
+                          'inputs': inputs, 'attr': attrs})
 
     for n in graph.inputs():
         uname = n.uniqueName()
@@ -88,12 +94,14 @@ def graph(model, args, verbose=False):
             print("Checking if it's onnx problem...")
             try:
                 import tempfile
-                torch.onnx.export(model, args, tempfile.TemporaryFile(), verbose=True)
+                torch.onnx.export(
+                    model, args, tempfile.TemporaryFile(), verbose=True)
             except RuntimeError:
                 print("Your model fails onnx too, please report to onnx team")
             return GraphDef(versions=VersionDef(producer=22))
     if LooseVersion(torch.__version__) >= LooseVersion("0.4.1"):
-        torch.onnx._optimize_trace(trace, torch._C._onnx.OperatorExportTypes.ONNX_ATEN_FALLBACK)
+        torch.onnx._optimize_trace(
+            trace, torch._C._onnx.OperatorExportTypes.ONNX_ATEN_FALLBACK)
     elif LooseVersion(torch.__version__) >= LooseVersion("0.4"):
         torch.onnx._optimize_trace(trace, False)
     else:
@@ -111,10 +119,11 @@ def graph(model, args, verbose=False):
             nodes.append(
                 NodeDef(name=node['name'], op=node['op'], input=node['inputs'],
                         attr={'lanpa': AttrValue(s=node['attr'].encode(encoding='utf_8')),
-                        '_output_shapes': AttrValue(list=AttrValue.ListValue(shape=[shapeproto]))}))
+                              '_output_shapes': AttrValue(list=AttrValue.ListValue(shape=[shapeproto]))}))
             # FIXME: fill with profile data
             node_stats.append(NodeExecStats(node_name=node['name'],
-                                            all_start_micros=int(time.time() * 1e7),
+                                            all_start_micros=int(
+                                                time.time() * 1e7),
                                             all_end_rel_micros=42,
                                             memory=[AllocatorMemoryUsed(allocator_name="cpu",
                                                                         total_bytes=19950829,

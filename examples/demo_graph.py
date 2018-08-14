@@ -48,6 +48,7 @@ class Net2(nn.Module):
         x = F.log_softmax(x, dim=1)
         return x
 
+
 dummy_input = Variable(torch.rand(13, 1, 28, 28))
 
 model = Net1()
@@ -78,13 +79,13 @@ with SummaryWriter(comment='resnet18') as w:
     w.add_graph(model, (dummy_input, ))
 
 
-
 class SimpleModel(nn.Module):
     def __init__(self):
         super(SimpleModel, self).__init__()
+
     def forward(self, x):
-        return x*2
-        
+        return x * 2
+
 
 model = SimpleModel()
 dummy_input = (torch.zeros(1, 2, 3),)
@@ -97,6 +98,7 @@ def conv3x3(in_planes, out_planes, stride=1):
     """3x3 convolution with padding"""
     return nn.Conv2d(in_planes, out_planes, kernel_size=3, stride=stride,
                      padding=1, bias=False)
+
 
 class BasicBlock(nn.Module):
     expansion = 1
@@ -126,17 +128,24 @@ class BasicBlock(nn.Module):
 dummy_input = torch.rand(1, 3, 224, 224)
 
 with SummaryWriter(comment='basicblock') as w:
-    model = BasicBlock(3,3)
-    w.add_graph(model, (dummy_input, ))#, verbose=True)
-
+    model = BasicBlock(3, 3)
+    w.add_graph(model, (dummy_input, ))  # , verbose=True)
 
 
 class RNN(nn.Module):
     def __init__(self, input_size, hidden_size, output_size):
         super(RNN, self).__init__()
         self.hidden_size = hidden_size
-        self.i2h = nn.Linear(n_categories + input_size + hidden_size, hidden_size)
-        self.i2o = nn.Linear(n_categories + input_size + hidden_size, output_size)
+        self.i2h = nn.Linear(
+            n_categories +
+            input_size +
+            hidden_size,
+            hidden_size)
+        self.i2o = nn.Linear(
+            n_categories +
+            input_size +
+            hidden_size,
+            output_size)
         self.o2o = nn.Linear(hidden_size + output_size, output_size)
         self.dropout = nn.Dropout(0.1)
         self.softmax = nn.LogSoftmax(dim=1)
@@ -174,5 +183,4 @@ print('expect error here:')
 with pytest.raises(Exception) as e_info:
     dummy_input = torch.rand(1, 1, 224, 224)
     with SummaryWriter(comment='basicblock_error') as w:
-        w.add_graph(model, (dummy_input, )) # error
-
+        w.add_graph(model, (dummy_input, ))  # error

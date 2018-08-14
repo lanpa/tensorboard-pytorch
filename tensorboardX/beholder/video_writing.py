@@ -57,12 +57,15 @@ class VideoWriter(object):
             print('Starting video with frame shape: %s', self.frame_shape)
         # Write the frame, advancing across output types as necessary.
         original_output_index = self.output_index
-        for self.output_index in range(original_output_index, len(self.outputs)):
+        for self.output_index in range(
+                original_output_index, len(self.outputs)):
             try:
                 if not self.output:
                     new_output = self.outputs[self.output_index]
                     if self.output_index > original_output_index:
-                        print('Falling back to video output %s', new_output.name())
+                        print(
+                            'Falling back to video output %s',
+                            new_output.name())
                     self.output = new_output(self.directory, self.frame_shape)
                 self.output.emit_frame(np_array)
                 return
@@ -145,7 +148,9 @@ class FFmpegVideoOutput(VideoOutput):
     def __init__(self, directory, frame_shape):
         self.filename = directory + '/video-{}.webm'.format(time.time())
         if len(frame_shape) != 3:
-            raise ValueError('Expected rank-3 array for frame, got %s' % str(frame_shape))
+            raise ValueError(
+                'Expected rank-3 array for frame, got %s' %
+                str(frame_shape))
         # Set input pixel format based on channel count.
         if frame_shape[2] == 1:
             pix_fmt = 'gray'
@@ -160,7 +165,8 @@ class FFmpegVideoOutput(VideoOutput):
             # Input options - raw video file format and codec.
             '-f', 'rawvideo',
             '-vcodec', 'rawvideo',
-            '-s', '%dx%d' % (frame_shape[1], frame_shape[0]),  # Width x height.
+            # Width x height.
+            '-s', '%dx%d' % (frame_shape[1], frame_shape[0]),
             '-pix_fmt', pix_fmt,
             '-r', '15',  # Frame rate: arbitrarily use 15 frames per second.
             '-i', '-',  # Use stdin.
@@ -168,17 +174,20 @@ class FFmpegVideoOutput(VideoOutput):
             # Output options - use lossless VP9 codec inside .webm.
             '-vcodec', 'libvpx-vp9',
             '-lossless', '1',
-            # Using YUV is most compatible, though conversion from RGB skews colors.
+            # Using YUV is most compatible, though conversion from RGB skews
+            # colors.
             '-pix_fmt', 'yuv420p',
             self.filename
         ]
         PIPE = subprocess.PIPE
-        self.ffmpeg = subprocess.Popen(command, stdin=PIPE, stdout=PIPE, stderr=PIPE)
+        self.ffmpeg = subprocess.Popen(
+            command, stdin=PIPE, stdout=PIPE, stderr=PIPE)
 
     def _handle_error(self):
         _, stderr = self.ffmpeg.communicate()
         bar = '=' * 40
-        print('Error writing to FFmpeg:\n%s\n%s\n%s', bar, stderr.rstrip('\n'), bar)
+        print('Error writing to FFmpeg:\n%s\n%s\n%s',
+              bar, stderr.rstrip('\n'), bar)
 
     def emit_frame(self, np_array):
         try:

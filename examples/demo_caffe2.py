@@ -47,12 +47,12 @@ if not os.path.exists(data_folder):
     print("Your data folder was not found!! This was generated: {}".format(data_folder))
 
 # Look for existing database: lmdb
-if os.path.exists(os.path.join(data_folder,"mnist-train-nchw-lmdb")):
+if os.path.exists(os.path.join(data_folder, "mnist-train-nchw-lmdb")):
     print("lmdb train db found!")
 else:
     db_missing = True
 
-if os.path.exists(os.path.join(data_folder,"mnist-test-nchw-lmdb")):
+if os.path.exists(os.path.join(data_folder, "mnist-test-nchw-lmdb")):
     print("lmdb test db found!")
 else:
     db_missing = True
@@ -64,7 +64,8 @@ if db_missing:
     try:
         DownloadResource(db_url, data_folder)
     except Exception as ex:
-        print("Failed to download dataset. Please download it manually from {}".format(db_url))
+        print(
+            "Failed to download dataset. Please download it manually from {}".format(db_url))
         print("Unzip it and place the two database folders here: {}".format(data_folder))
         raise ex
 
@@ -92,7 +93,7 @@ def AddInput(model, batch_size, db, db_type):
     # cast the data to float
     data = model.Cast(data_uint8, "data", to=core.DataType.FLOAT)
     # scale data from [0,255] down to [0,1]
-    data = model.Scale(data, data, scale=float(1./256))
+    data = model.Scale(data, data, scale=float(1. / 256))
     # don't need the gradient for the backward pass
     data = model.StopGradient(data, data)
     return data, label
@@ -117,7 +118,8 @@ def AddLeNetModel(model, data):
     conv2 = brew.conv(model, pool1, 'conv2', dim_in=20, dim_out=100, kernel=5)
     # Image size: 8 x 8 -> 4 x 4
     pool2 = brew.max_pool(model, conv2, 'pool2', kernel=2, stride=2)
-    # 50 * 4 * 4 stands for dim_out from previous layer multiplied by the image size
+    # 50 * 4 * 4 stands for dim_out from previous layer multiplied by the
+    # image size
     fc3 = brew.fc(model, pool2, 'fc3', dim_in=100 * 4 * 4, dim_out=500)
     relu = brew.relu(model, fc3, fc3)
     pred = brew.fc(model, relu, 'pred', 500, 10)
@@ -138,13 +140,14 @@ def AddTrainingOperators(model, softmax, label):
     loss = model.AveragedLoss(xent, "loss")
     # track the accuracy of the model
     AddAccuracy(model, softmax, label)
-    # use the average loss we just computed to add gradient operators to the model
+    # use the average loss we just computed to add gradient operators to the
+    # model
     model.AddGradientOperators([loss])
     # do a simple stochastic gradient descent
     ITER = brew.iter(model, "iter")
     # set the learning rate schedule
     LR = model.LearningRate(
-        ITER, "LR", base_lr=-0.1, policy="step", stepsize=1, gamma=0.999 )
+        ITER, "LR", base_lr=-0.1, policy="step", stepsize=1, gamma=0.999)
     # ONE is a constant value that is used in the gradient update. We only need
     # to create it once, so it is explicitly placed in param_init_net.
     ONE = model.param_init_net.ConstantFill([], "ONE", shape=[1], value=1.0)
@@ -178,6 +181,7 @@ def AddBookkeepingOperators(model):
     # is going to take time - summarization do not come for free. For this
     # demo, we will only show how to summarize the parameters and their
     # gradients.
+
 
 arg_scope = {"order": "NCHW"}
 train_model = model_helper.ModelHelper(name="mnist_train", arg_scope=arg_scope)

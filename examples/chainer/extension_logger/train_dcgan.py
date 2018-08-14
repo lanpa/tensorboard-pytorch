@@ -13,7 +13,9 @@ from net import Generator
 from updater import DCGANUpdater
 from visualize import out_generated_image
 from tensorboardX import SummaryWriter
-from writetnesorboard import LogTensorboard
+from writetensorboard import LogTensorboard
+
+
 def main():
     parser = argparse.ArgumentParser(description='Chainer example: DCGAN')
     parser.add_argument('--batchsize', '-b', type=int, default=50,

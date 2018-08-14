@@ -6,9 +6,9 @@ option java_outer_classname = "AttrValueProtos";
 option java_multiple_files = true;
 option java_package = "org.tensorflow.framework";
 
-import "tensorboardX/src/tensor.proto";
-import "tensorboardX/src/tensor_shape.proto";
-import "tensorboardX/src/types.proto";
+import "tensorboardX/proto/tensor.proto";
+import "tensorboardX/proto/tensor_shape.proto";
+import "tensorboardX/proto/types.proto";
 
 // Protocol buffer representing the value for an attr used to configure an Op.
 // Comment indicates the corresponding attr type.  Only the field matching the

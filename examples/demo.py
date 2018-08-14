@@ -11,44 +11,50 @@ writer = SummaryWriter()
 sample_rate = 44100
 freqs = [262, 294, 330, 349, 392, 440, 440, 440, 440, 440, 440]
 
-true_positive_counts=[75, 64, 21, 5, 0]
-false_positive_counts=[150, 105, 18, 0, 0]
-true_negative_counts=[0, 45, 132, 150, 150]
-false_negative_counts=[0, 11, 54, 70, 75]
-precision=[0.3333333, 0.3786982, 0.5384616, 1.0, 0.0]
-recall=[1.0, 0.8533334, 0.28, 0.0666667, 0.0]
+true_positive_counts = [75, 64, 21, 5, 0]
+false_positive_counts = [150, 105, 18, 0, 0]
+true_negative_counts = [0, 45, 132, 150, 150]
+false_negative_counts = [0, 11, 54, 70, 75]
+precision = [0.3333333, 0.3786982, 0.5384616, 1.0, 0.0]
+recall = [1.0, 0.8533334, 0.28, 0.0666667, 0.0]
 
 
 for n_iter in range(100):
-    s1 = torch.rand(1) # value to keep
+    s1 = torch.rand(1)  # value to keep
     s2 = torch.rand(1)
-    writer.add_scalar('data/scalar_systemtime', s1[0], n_iter) # data grouping by `slash`
-    writer.add_scalar('data/scalar_customtime', s1[0], n_iter, walltime=n_iter) # data grouping by `slash`
-    writer.add_scalars('data/scalar_group', {"xsinx":n_iter*np.sin(n_iter),
-                                             "xcosx":n_iter*np.cos(n_iter),
+    # data grouping by `slash`
+    writer.add_scalar('data/scalar_systemtime', s1[0], n_iter)
+    # data grouping by `slash`
+    writer.add_scalar('data/scalar_customtime', s1[0], n_iter, walltime=n_iter)
+    writer.add_scalars('data/scalar_group', {"xsinx": n_iter * np.sin(n_iter),
+                                             "xcosx": n_iter * np.cos(n_iter),
                                              "arctanx": np.arctan(n_iter)}, n_iter)
-    x = torch.rand(32, 3, 64, 64) # output from network
-    if n_iter%10==0:
+    x = torch.rand(32, 3, 64, 64)  # output from network
+    if n_iter % 10 == 0:
         x = vutils.make_grid(x, normalize=True, scale_each=True)
-        writer.add_image('Image', x, n_iter) # Tensor
-        #writer.add_image('astronaut', skimage.data.astronaut(), n_iter) # numpy
-        #writer.add_image('imread', skimage.io.imread('screenshots/audio.png'), n_iter) # numpy
-        x = torch.zeros(sample_rate*2)
+        writer.add_image('Image', x, n_iter)  # Tensor
+        # writer.add_image('astronaut', skimage.data.astronaut(), n_iter) # numpy
+        # writer.add_image('imread',
+        # skimage.io.imread('screenshots/audio.png'), n_iter) # numpy
+        x = torch.zeros(sample_rate * 2)
         for i in range(x.size(0)):
-            x[i] = np.cos(freqs[n_iter//10]*np.pi*float(i)/float(sample_rate)) # sound amplitude should in [-1, 1]
+            # sound amplitude should in [-1, 1]
+            x[i] = np.cos(freqs[n_iter // 10] * np.pi *
+                          float(i) / float(sample_rate))
         writer.add_audio('myAudio', x, n_iter)
-        writer.add_text('Text', 'text logged at step:'+str(n_iter), n_iter)
+        writer.add_text('Text', 'text logged at step:' + str(n_iter), n_iter)
         writer.add_text('markdown Text', '''a|b\n-|-\nc|d''', n_iter)
         for name, param in resnet18.named_parameters():
-            if 'bn' not in name:            
+            if 'bn' not in name:
                 writer.add_histogram(name, param, n_iter)
-        writer.add_pr_curve('xoxo', np.random.randint(2, size=100), np.random.rand(100), n_iter) #needs tensorboard 0.4RC or later
+        writer.add_pr_curve('xoxo', np.random.randint(2, size=100), np.random.rand(
+            100), n_iter)  # needs tensorboard 0.4RC or later
         writer.add_pr_curve_raw('prcurve with raw data', true_positive_counts,
-            false_positive_counts,
-            true_negative_counts,
-            false_negative_counts,
-            precision,
-            recall, n_iter)
+                                false_positive_counts,
+                                true_negative_counts,
+                                false_negative_counts,
+                                precision,
+                                recall, n_iter)
 # export scalar data to JSON for external processing
 writer.export_scalars_to_json("./all_scalars.json")
 
@@ -66,14 +72,14 @@ features_train = images_train.view(100, 784)
 all_features = torch.cat((features, features_train))
 all_labels = torch.cat((label, labels_train))
 all_images = torch.cat((images, images_train))
-dataset_label = ['test']*100 + ['train']*100
+dataset_label = ['test'] * 100 + ['train'] * 100
 all_labels = list(zip(all_labels, dataset_label))
 
 writer.add_embedding(all_features, metadata=all_labels, label_img=all_images.unsqueeze(1),
                      metadata_header=['digit', 'dataset'], global_step=2)
 
 # VIDEO
-vid_images = dataset.train_data[:16*48]
+vid_images = dataset.train_data[:16 * 48]
 vid = vid_images.view(16, 1, 48, 28, 28)  # BxCxTxHxW
 
 writer.add_video('video', vid_tensor=vid)

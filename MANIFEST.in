@@ -1,2 +1,3 @@
 include HISTORY.rst
 include LICENSE
+recursive-include tensorboardX/proto *

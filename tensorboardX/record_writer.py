@@ -17,7 +17,8 @@ class RecordWriter(object):
         self._name_to_tf_name = {}
         self._tf_names = set()
         self.path = path
-        self.flush_secs = flush_secs  # TODO. flush every flush_secs, not every time.
+        # TODO. flush every flush_secs, not every time.
+        self.flush_secs = flush_secs
         self._writer = None
         self._writer = open(path, 'wb')
 

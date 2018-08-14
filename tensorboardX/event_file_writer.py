@@ -26,7 +26,7 @@ import time
 
 import six
 
-from .src import event_pb2
+from .proto import event_pb2
 from .record_writer import RecordWriter
 
 
@@ -98,7 +98,8 @@ class EventFileWriter(object):
     @@close
     """
 
-    def __init__(self, logdir, max_queue=10, flush_secs=120, filename_suffix=''):
+    def __init__(self, logdir, max_queue=10,
+                 flush_secs=120, filename_suffix=''):
         """Creates a `EventFileWriter` and an event file to write to.
         On construction the summary writer creates a new event file in `logdir`.
         This event file will contain `Event` protocol buffers, which are written to
@@ -118,7 +119,11 @@ class EventFileWriter(object):
         self._logdir = logdir
         directory_check(self._logdir)
         self._event_queue = six.moves.queue.Queue(max_queue)
-        self._ev_writer = EventsWriter(os.path.join(self._logdir, "events"), filename_suffix)
+        self._ev_writer = EventsWriter(
+            os.path.join(
+                self._logdir,
+                "events"),
+            filename_suffix)
         self._closed = False
         self._worker = _EventLoggerThread(self._event_queue, self._ev_writer,
                                           flush_secs)

@@ -25,7 +25,8 @@ class VisdomWriter:
         try:
             from visdom import Visdom
         except ImportError:
-            raise ImportError("Visdom visualization requires installation of Visdom")
+            raise ImportError(
+                "Visdom visualization requires installation of Visdom")
 
         self.scalar_dict = {}
         self.server_connected = False
@@ -44,7 +45,8 @@ class VisdomWriter:
         assert self.server_connected, 'No connection could be formed quickly'
 
     @_check_connection
-    def add_scalar(self, tag, scalar_value, global_step=None, main_tag='default'):
+    def add_scalar(self, tag, scalar_value, global_step=None,
+                   main_tag='default'):
         """Add scalar data to Visdom. Plots the values in a plot titled
            {main_tag}-{tag}.
 
@@ -57,10 +59,12 @@ class VisdomWriter:
         if self.scalar_dict.get(main_tag) is None:
             self.scalar_dict[main_tag] = {}
         exists = self.scalar_dict[main_tag].get(tag) is not None
-        self.scalar_dict[main_tag][tag] = self.scalar_dict[main_tag][tag] + [scalar_value] if exists else [scalar_value]
+        self.scalar_dict[main_tag][tag] = self.scalar_dict[main_tag][tag] + \
+            [scalar_value] if exists else [scalar_value]
         plot_name = '{}-{}'.format(main_tag, tag)
         # If there is no global_step provided, follow sequential order
-        x_val = len(self.scalar_dict[main_tag][tag]) if not global_step else global_step
+        x_val = len(self.scalar_dict[main_tag][tag]
+                    ) if not global_step else global_step
         if exists:
             # Update our existing Visdom window
             self.vis.line(
@@ -187,13 +191,16 @@ class VisdomWriter:
         if len(shape) > 4:
             for i in range(shape[0]):
                 # Reshape each video to Visdom's (T x H x W x C) and write each video
-                # TODO: reverse the logic here, shoudl do the permutation in numpy
+                # TODO: reverse the logic here, shoudl do the permutation in
+                # numpy
                 if isinstance(vid_tensor, np.ndarray):
                     import torch
-                    ind_vid = torch.from_numpy(vid_tensor[i, :, :, :, :]).permute(1, 2, 3, 0)
+                    ind_vid = torch.from_numpy(
+                        vid_tensor[i, :, :, :, :]).permute(1, 2, 3, 0)
                 else:
                     ind_vid = vid_tensor[i, :, :, :, :].permute(1, 2, 3, 0)
-                scale_factor = 255 if np.any((ind_vid > 0) & (ind_vid < 1)) else 1
+                scale_factor = 255 if np.any(
+                    (ind_vid > 0) & (ind_vid < 1)) else 1
                 # Visdom looks for .ndim attr, this is something raw Tensors don't have
                 # Cast to Numpy array to get .ndim attr
                 ind_vid = ind_vid.numpy()
@@ -218,7 +225,9 @@ class VisdomWriter:
             snd_tensor: :math:`(1, L)`. The values should lie between [-1, 1].
         """
         snd_tensor = make_np(snd_tensor)
-        self.vis.audio(tensor=snd_tensor, opts={'sample_frequency': sample_rate})
+        self.vis.audio(
+            tensor=snd_tensor, opts={
+                'sample_frequency': sample_rate})
 
     @_check_connection
     def add_text(self, tag, text_string, global_step=None):
@@ -238,22 +247,26 @@ class VisdomWriter:
         self.vis.text(text_string)
 
     @_check_connection
-    def add_graph_onnx(self, prototxt):
-        # TODO: Visdom doesn't support graph visualization yet, so this is a no-op
+    def add_onnx_graph(self, prototxt):
+        # TODO: Visdom doesn't support graph visualization yet, so this is a
+        # no-op
         return
 
     @_check_connection
     def add_graph(self, model, input_to_model=None, verbose=False, **kwargs):
-        # TODO: Visdom doesn't support graph visualization yet, so this is a no-op
+        # TODO: Visdom doesn't support graph visualization yet, so this is a
+        # no-op
         return
 
     @_check_connection
-    def add_embedding(self, mat, metadata=None, label_img=None, global_step=None, tag='default', metadata_header=None):
+    def add_embedding(self, mat, metadata=None, label_img=None,
+                      global_step=None, tag='default', metadata_header=None):
         # TODO: Visdom doesn't support embeddings yet, so this is a no-op
         return
 
     @_check_connection
-    def add_pr_curve(self, tag, labels, predictions, global_step=None, num_thresholds=127, weights=None):
+    def add_pr_curve(self, tag, labels, predictions,
+                     global_step=None, num_thresholds=127, weights=None):
         """Adds precision recall curve.
 
         Args:

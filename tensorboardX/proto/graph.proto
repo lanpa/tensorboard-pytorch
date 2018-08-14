@@ -6,9 +6,9 @@ option java_outer_classname = "GraphProtos";
 option java_multiple_files = true;
 option java_package = "org.tensorflow.framework";
 
-import "tensorboardX/src/node_def.proto";
+import "tensorboardX/proto/node_def.proto";
 //import "tensorflow/core/framework/function.proto";
-import "tensorboardX/src/versions.proto";
+import "tensorboardX/proto/versions.proto";
 
 // Represents the graph of operations
 message GraphDef {
