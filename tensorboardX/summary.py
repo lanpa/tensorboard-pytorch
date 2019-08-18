@@ -103,8 +103,8 @@ def hparams(hparam_dict=None, metric_dict=None):
             ssi.hparams[k].bool_value = v
             continue
 
-        if not isinstance(v, int) or not isinstance(v, float):
-            v = make_np(v)[0]            
+        if isinstance(v, (int, float)):
+            v = make_np(v)[0]
             ssi.hparams[k].number_value = v
 
     content = HParamsPluginData(session_start_info=ssi, version=PLUGIN_DATA_VERSION)
