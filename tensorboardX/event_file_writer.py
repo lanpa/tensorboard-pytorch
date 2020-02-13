@@ -22,6 +22,7 @@ import os
 import socket
 import threading
 import time
+from botocore.exceptions import EndpointConnectionError
 
 import six
 
@@ -191,6 +192,7 @@ class _EventLoggerThread(threading.Thread):
         # time to flush the writer, whichever is earlier. If we have an
         # data, write it. If not, an empty queue exception will be raised
         # and we can proceed to flush the writer.
+        connection = True
         while True:
             now = time.time()
             queue_wait_duration = self._next_flush_time - now
@@ -213,11 +215,27 @@ class _EventLoggerThread(threading.Thread):
 
             now = time.time()
             if now > self._next_flush_time:
+                # Small optimization - if there are no pending data,
+                # there's no need to flush, since each flush can be
+                # expensive (e.g. uploading a new file to a server).
                 if self._has_pending_data:
-                    # Small optimization - if there are no pending data,
-                    # there's no need to flush, since each flush can be
-                    # expensive (e.g. uploading a new file to a server).
-                    self._record_writer.flush()
+                    # .flush() create a new connection each time, if there is
+                    # fluctuation in connection boto3.client('s3', endpoint_url)
+                    # throws an error and since it is not handled the thread will
+                    # hang and since the queue is full the training will also hang.
+                    # this try block will prevent getting stuck, instead it waits
+                    # for the connection to be established again. Connection
+                    # variable will make sure the print happens only once.
+                    try:
+                        self._record_writer.flush()
+                        if not connection:
+                            print("Connection re-established")
+                            connection = True
+                    except EndpointConnectionError as e:
+                        if connection:
+                            print("Connection lost, waiting for connection")
+                            connection = False
+                        continue
                     self._has_pending_data = False
                 # Do it again in flush_secs.
                 self._next_flush_time = now + self._flush_secs
